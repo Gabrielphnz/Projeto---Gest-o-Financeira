@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <base target="_top">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+      :root {
+        --primary: #4F46E5;
+        --primary-hover: #4338CA;
+        --bg-color: #F3F4F6;
+        --card-bg: #FFFFFF;
+        --text-main: #1F2937;
+        --text-muted: #6B7280;
+        --success: #10B981;
+        --danger: #EF4444;
+        --warning: #F59E0B;
+      }
+      
+      body { 
+        font-family: 'Inter', sans-serif; 
+        background-color: var(--bg-color); 
+        margin: 0; 
+        padding-bottom: 70px; 
+        color: var(--text-main);
+      }
+      
+      .header { 
+        background: var(--card-bg); 
+        padding: 20px; 
+        text-align: center; 
+        font-weight: 700; 
+        font-size: 1.2rem;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        position: sticky;
+        top: 0;
+        z-index: 10;
+      }
+
+      .tab-content { display: none; padding: 20px; }
+      .tab-content.active { display: block; animation: fadeIn 0.3s ease; }
+      
+      @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+
+      .card { 
+        background: var(--card-bg); 
+        padding: 20px; 
+        border-radius: 16px; 
+        box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05), 0 2px 4px -1px rgba(0,0,0,0.03); 
+        margin-bottom: 20px; 
+      }
+      
+      .card h3 { margin-top: 0; color: var(--text-main); font-size: 1.1rem; }
+
+      .item-lista { 
+        border-bottom: 1px solid #E5E7EB; 
+        padding: 15px 0; 
+        display: flex; 
+        justify-content: space-between; 
+        align-items: center; 
+      }
+      .item-lista:last-child { border-bottom: none; padding-bottom: 0; }
+      
+      .item-info strong { font-size: 1rem; color: var(--text-main); display: block; margin-bottom: 4px; }
+      .item-info span { font-size: 0.85rem; color: var(--text-muted); }
+      
+      .item-acoes { text-align: right; }
+      .item-valor { font-weight: 700; font-size: 1.1rem; margin-bottom: 8px; }
+      
+      .btn-gerenciar { 
+        background: var(--bg-color); 
+        color: var(--text-main); 
+        border: 1px solid #D1D5DB; 
+        padding: 6px 12px; 
+        border-radius: 8px; 
+        cursor: pointer; 
+        font-size: 0.8rem;
+        font-weight: 500;
+        transition: all 0.2s;
+      }
+      .btn-gerenciar:hover { background: #E5E7EB; }
+
+      .btn-float { 
+        position: fixed; bottom: 90px; right: 20px; 
+        background: var(--primary); color: white; 
+        border: none; width: 56px; height: 56px; 
+        border-radius: 50%; font-size: 28px; 
+        box-shadow: 0 10px 15px -3px rgba(79, 70, 229, 0.4); 
+        cursor: pointer; display: flex; align-items: center; justify-content: center;
+        transition: transform 0.2s;
+      }
+      .btn-float:active { transform: scale(0.95); }
+
+      .nav-bar { 
+        position: fixed; bottom: 0; width: 100%; 
+        background: var(--card-bg); display: flex; 
+        box-shadow: 0 -4px 6px -1px rgba(0,0,0,0.05); 
+        padding-bottom: env(safe-area-inset-bottom);
+      }
+      .nav-btn { 
+        flex: 1; padding: 16px 0; text-align: center; 
+        background: none; border: none; font-size: 0.9rem; 
+        color: var(--text-muted); cursor: pointer; font-weight: 500;
+      }
+      .nav-btn.active { color: var(--primary); border-top: 3px solid var(--primary); }
+
+      /* Ajustes SweetAlert2 para Mobile */
+      .swal2-popup { border-radius: 16px !important; }
+      .swal-form-input { 
+        width: 100%; padding: 12px; margin: 8px 0; 
+        border: 1px solid #D1D5DB; border-radius: 8px; 
+        box-sizing: border-box; font-family: 'Inter', sans-serif;
+      }
+      .swal-form-select {
+        width: 100%; padding: 12px; margin: 8px 0;
+        border: 1px solid #D1D5DB; border-radius: 8px;
+        background: white; font-family: 'Inter', sans-serif;
+      }
+    </style>
+  </head>
+  <body>
+    
+    <div class="header">Organização Financeira</div>
+
+    <div id="tab-dashboard" class="tab-content active">
+      <div class="card">
+        <h3>Visão Geral</h3>
+        <canvas id="meuGrafico"></canvas>
+      </div>
+      <div class="card" id="resumo-cards">Carregando...</div>
+    </div>
+
+    <div id="tab-lancamentos" class="tab-content">
+      <div class="card">
+        <h3>Movimentações</h3>
+        <div id="lista-lancamentos">Carregando...</div>
+      </div>
+      <button class="btn-float" onclick="abrirModalFormulario()">+</button>
+    </div>
+
+    <div id="tab-planners" class="tab-content">
+      <div class="card">
+        <h3>Planners</h3>
+        <p style="color: var(--text-muted); font-size: 0.9rem;">Em breve: Gestão de orçamentos e centros de custo.</p>
+      </div>
+    </div>
+
+    <div class="nav-bar">
+      <button class="nav-btn active" onclick="trocarAba('tab-dashboard', this)">Dashboard</button>
+      <button class="nav-btn" onclick="trocarAba('tab-lancamentos', this)">Lançamentos</button>
+      <button class="nav-btn" onclick="trocarAba('tab-planners', this)">Planners</button>
+    </div>
+
+    <script>
+      let lancamentosAtuais = [];
+
+      document.addEventListener("DOMContentLoaded", () => { carregarDados(); });
+
+      function trocarAba(idAba, btn) {
+        document.querySelectorAll('.tab-content').forEach(aba => aba.classList.remove('active'));
+        document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+        document.getElementById(idAba).classList.add('active');
+        btn.classList.add('active');
+      }
+
+function carregarDados() {
+        document.getElementById('lista-lancamentos').innerHTML = '<p style="color: #6B7280; text-align: center; padding: 20px 0;">Carregando dados...</p>';
+        
+        google.script.run
+          .withSuccessHandler((dados) => {
+            // Trava de segurança: Garante que "dados" seja sempre um array, mesmo se vier null
+            const dadosSeguros = dados || []; 
+            lancamentosAtuais = dadosSeguros; 
+            montarLista(dadosSeguros);
+            montarGrafico(dadosSeguros);
+          })
+          .withFailureHandler((err) => {
+            // Se der erro no backend (ex: aba com nome errado), mostra na tela
+            document.getElementById('lista-lancamentos').innerHTML = `<p style="color: var(--danger); text-align: center; padding: 20px 0;">Erro: ${err.message}</p>`;
+          })
+          .obterLancamentos();
+      }
+
+      function montarLista(dados) {
+        const divLista = document.getElementById('lista-lancamentos');
+        
+        // Verifica de forma segura se a lista está vazia
+        if(!dados || dados.length === 0) { 
+          divLista.innerHTML = '<p style="color: #6B7280; text-align: center; padding: 20px 0;">Nenhum lançamento encontrado. Clique no botão "+" para adicionar.</p>'; 
+          return; 
+        }
+        
+        let html = '';
+        dados.slice(0, 15).forEach(item => {
+          const corValor = item.status === 'Pendente' ? 'var(--danger)' : 'var(--success)';
+          html += `
+            <div class="item-lista">
+              <div class="item-info">
+                <strong>${item.descricao || 'Sem Descrição'}</strong>
+                <span>${item.dataVenc} • ${item.formaPgto} • ${item.categoria || 'Geral'}</span>
+              </div>
+              <div class="item-acoes">
+                <div class="item-valor" style="color: ${corValor}">R$ ${item.valor.toFixed(2)}</div>
+                <button class="btn-gerenciar" onclick="gerenciarItem('${item.id}')">Gerenciar</button>
+              </div>
+            </div>
+          `;
+        });
+        divLista.innerHTML = html;
+      }
+
+      function montarGrafico(dados) {
+        const total = dados.reduce((acc, curr) => acc + curr.valor, 0);
+        document.getElementById('resumo-cards').innerHTML = `<strong style="font-size:1.2rem;">Total: R$ ${total.toFixed(2)}</strong>`;
+        // Lógica do gráfico mantida simples para o exemplo
+        const ctx = document.getElementById('meuGrafico').getContext('2d');
+        if(window.meuChart) window.meuChart.destroy();
+        window.meuChart = new Chart(ctx, {
+          type: 'doughnut',
+          data: {
+            labels: ['Cadastrados'], datasets: [{ data: [total || 1], backgroundColor: ['#4F46E5'] }]
+          },
+          options: { cutout: '75%', plugins: { legend: { display: false } } }
+        });
+      }
+
+      // NOVO: Fluxo de Gestão (Editar / Excluir)
+      function gerenciarItem(id) {
+        const item = lancamentosAtuais.find(l => l.id === id);
+        
+        Swal.fire({
+          title: item.descricao,
+          text: `Valor: R$ ${item.valor.toFixed(2)}`,
+          showDenyButton: true,
+          showCancelButton: true,
+          confirmButtonText: 'Editar',
+          denyButtonText: 'Excluir',
+          cancelButtonText: 'Voltar',
+          confirmButtonColor: '#4F46E5',
+          denyButtonColor: '#EF4444'
+        }).then((result) => {
+          if (result.isConfirmed) {
+            abrirModalFormulario(item); // Abre o form preenchido
+          } else if (result.isDenied) {
+            confirmarExclusao(id);
+          }
+        });
+      }
+
+      function confirmarExclusao(id) {
+        Swal.fire({
+          title: 'Tem certeza?',
+          text: "Essa ação removerá a linha da planilha.",
+          icon: 'warning',
+          showCancelButton: true,
+          confirmButtonColor: '#EF4444',
+          cancelButtonColor: '#6B7280',
+          confirmButtonText: 'Sim, excluir!'
+        }).then((result) => {
+          if (result.isConfirmed) {
+            Swal.showLoading();
+            google.script.run
+              .withSuccessHandler(() => {
+                Swal.fire('Excluído!', '', 'success');
+                carregarDados();
+              }).withFailureHandler((err) => {
+                Swal.fire('Erro', err.message, 'error');
+              }).excluirLancamento(id);
+          }
+        });
+      }
+
+      // Modal unificado para Criar e Editar
+      function abrirModalFormulario(itemExistente = null) {
+        const isEdit = itemExistente !== null;
+        
+        // Formata data para o input type="date" (YYYY-MM-DD)
+        let dataInput = '';
+        if (isEdit && itemExistente.dataVencBruta) {
+          const d = new Date(itemExistente.dataVencBruta);
+          dataInput = d.toISOString().split('T')[0];
+        }
+
+        const htmlForm = `
+          <input id="f-desc" class="swal-form-input" placeholder="Descrição (ex: Mercado)" value="${isEdit ? itemExistente.descricao : ''}">
+          <input id="f-valor" type="number" step="0.01" class="swal-form-input" placeholder="Valor (R$)" value="${isEdit ? itemExistente.valor : ''}">
+          
+          <select id="f-forma" class="swal-form-select">
+            <option value="" disabled ${!isEdit || !itemExistente.formaPgto ? 'selected' : ''}>Forma de Pagamento</option>
+            <option value="Pix" ${isEdit && itemExistente.formaPgto === 'Pix' ? 'selected' : ''}>Pix</option>
+            <option value="Cartão de Crédito" ${isEdit && itemExistente.formaPgto === 'Cartão de Crédito' ? 'selected' : ''}>Cartão de Crédito</option>
+            <option value="Boleto" ${isEdit && itemExistente.formaPgto === 'Boleto' ? 'selected' : ''}>Boleto</option>
+          </select>
+          
+          <input id="f-cat" class="swal-form-input" placeholder="Categoria Principal" value="${isEdit ? itemExistente.categoria : ''}">
+          
+          <select id="f-status" class="swal-form-select">
+            <option value="Pendente" ${isEdit && itemExistente.status === 'Pendente' ? 'selected' : ''}>Pendente</option>
+            <option value="Liquidado" ${isEdit && itemExistente.status === 'Liquidado' ? 'selected' : ''}>Liquidado</option>
+          </select>
+          
+          <input id="f-venc" type="date" class="swal-form-input" value="${dataInput}">
+        `;
+
+        Swal.fire({
+          title: isEdit ? 'Editar Lançamento' : 'Novo Lançamento',
+          html: htmlForm,
+          focusConfirm: false,
+          showCancelButton: true,
+          confirmButtonText: 'Salvar',
+          cancelButtonText: 'Cancelar',
+          confirmButtonColor: '#10B981',
+          preConfirm: () => {
+            return {
+              id: isEdit ? itemExistente.id : null,
+              descricao: document.getElementById('f-desc').value,
+              valorBruto: document.getElementById('f-valor').value,
+              formaPagamento: document.getElementById('f-forma').value,
+              categoria: document.getElementById('f-cat').value,
+              status: document.getElementById('f-status').value,
+              dataVencimento: document.getElementById('f-venc').value
+            };
+          }
+        }).then((result) => {
+          if (result.isConfirmed) {
+            Swal.showLoading();
+            google.script.run
+              .withSuccessHandler((msg) => {
+                Swal.fire('Sucesso!', msg, 'success');
+                carregarDados(); // Recarrega a tela automaticamente
+              })
+              .withFailureHandler((err) => {
+                Swal.fire('Erro', err.message, 'error');
+              })
+              .salvarLancamento(result.value);
+          }
+        });
+      }
+    </script>
+  </body>
+</html>
