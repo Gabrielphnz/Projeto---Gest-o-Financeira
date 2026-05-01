@@ -4,206 +4,271 @@
     <base target="_top">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
       :root {
-        --primary: #4F46E5;
-        --primary-hover: #4338CA;
+        --primary: #7C3AED; /* Roxo Fintech */
         --bg-color: #F3F4F6;
         --card-bg: #FFFFFF;
         --text-main: #1F2937;
         --text-muted: #6B7280;
         --success: #10B981;
+        --success-bg: #D1FAE5;
         --danger: #EF4444;
-        --warning: #F59E0B;
+        --danger-bg: #FEE2E2;
       }
+      
+      * { box-sizing: border-box; margin: 0; padding: 0; }
       
       body { 
         font-family: 'Inter', sans-serif; 
         background-color: var(--bg-color); 
-        margin: 0; 
-        padding-bottom: 70px; 
+        padding-bottom: 90px; 
         color: var(--text-main);
       }
       
-      .header { 
-        background: var(--card-bg); 
-        padding: 20px; 
-        text-align: center; 
-        font-weight: 700; 
-        font-size: 1.2rem;
-        box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-        position: sticky;
-        top: 0;
-        z-index: 10;
+      /* Header Roxo */
+      .header {
+        background: var(--primary);
+        padding: 30px 20px 60px 20px;
+        color: white;
+        text-align: center;
+        border-radius: 0 0 32px 32px;
+      }
+      .header p { font-size: 0.9rem; opacity: 0.8; margin-bottom: 5px; }
+      .header h1 { font-size: 2.5rem; font-weight: 700; }
+
+      /* Container de Cards Resumo */
+      .cards-container {
+        display: flex;
+        gap: 15px;
+        margin: -40px 20px 25px 20px;
       }
 
-      .tab-content { display: none; padding: 20px; }
-      .tab-content.active { display: block; animation: fadeIn 0.3s ease; }
-      
-      @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
-
-      .card { 
-        background: var(--card-bg); 
-        padding: 20px; 
-        border-radius: 16px; 
-        box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05), 0 2px 4px -1px rgba(0,0,0,0.03); 
-        margin-bottom: 20px; 
+      .card-resumo {
+        flex: 1;
+        background: var(--card-bg);
+        border-radius: 20px;
+        padding: 16px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
       }
-      
-      .card h3 { margin-top: 0; color: var(--text-main); font-size: 1.1rem; }
+
+      .card-resumo-header {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 8px;
+      }
+
+      .icon-box {
+        width: 32px; height: 32px; border-radius: 10px;
+        display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: bold;
+      }
+      .icon-receita { background: var(--success-bg); color: var(--success); }
+      .icon-despesa { background: var(--danger-bg); color: var(--danger); }
+
+      .card-resumo p { font-size: 0.8rem; color: var(--text-muted); font-weight: 500; }
+      .card-resumo h3 { font-size: 1.1rem; font-weight: 700; color: var(--text-main); }
+      .valor-receita { color: var(--success) !important; }
+      .valor-despesa { color: var(--danger) !important; }
+
+      /* Seção de Lista */
+      .section-title { font-size: 1.1rem; font-weight: 700; margin: 0 20px 15px 20px; color: var(--text-main); }
+      .lista-container { padding: 0 20px; }
 
       .item-lista { 
-        border-bottom: 1px solid #E5E7EB; 
-        padding: 15px 0; 
+        background: var(--card-bg);
+        border-radius: 16px;
+        padding: 16px; 
+        margin-bottom: 12px;
         display: flex; 
-        justify-content: space-between; 
         align-items: center; 
+        box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+        cursor: pointer;
+        transition: transform 0.1s;
       }
-      .item-lista:last-child { border-bottom: none; padding-bottom: 0; }
+      .item-lista:active { transform: scale(0.98); }
       
-      .item-info strong { font-size: 1rem; color: var(--text-main); display: block; margin-bottom: 4px; }
-      .item-info span { font-size: 0.85rem; color: var(--text-muted); }
+      .item-icon-bg {
+        width: 44px; height: 44px;
+        border-radius: 12px;
+        background: var(--bg-color);
+        display: flex; align-items: center; justify-content: center;
+        font-size: 20px; margin-right: 15px; flex-shrink: 0;
+      }
+      
+      .item-info { flex: 1; overflow: hidden; }
+      .item-info strong { font-size: 0.95rem; display: block; margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;}
+      .item-info span { font-size: 0.75rem; color: var(--text-muted); }
       
       .item-acoes { text-align: right; }
-      .item-valor { font-weight: 700; font-size: 1.1rem; margin-bottom: 8px; }
+      .item-valor { font-weight: 700; font-size: 1rem; }
+      .status-badge { font-size: 0.7rem; border-radius: 6px; padding: 3px 8px; margin-top: 5px; display: inline-block; font-weight: 600;}
       
-      .btn-gerenciar { 
-        background: var(--bg-color); 
-        color: var(--text-main); 
-        border: 1px solid #D1D5DB; 
-        padding: 6px 12px; 
-        border-radius: 8px; 
-        cursor: pointer; 
-        font-size: 0.8rem;
-        font-weight: 500;
-        transition: all 0.2s;
-      }
-      .btn-gerenciar:hover { background: #E5E7EB; }
-
-      .btn-float { 
-        position: fixed; bottom: 90px; right: 20px; 
-        background: var(--primary); color: white; 
-        border: none; width: 56px; height: 56px; 
-        border-radius: 50%; font-size: 28px; 
-        box-shadow: 0 10px 15px -3px rgba(79, 70, 229, 0.4); 
-        cursor: pointer; display: flex; align-items: center; justify-content: center;
-        transition: transform 0.2s;
-      }
-      .btn-float:active { transform: scale(0.95); }
-
+      /* Navegação Inferior */
       .nav-bar { 
         position: fixed; bottom: 0; width: 100%; 
-        background: var(--card-bg); display: flex; 
-        box-shadow: 0 -4px 6px -1px rgba(0,0,0,0.05); 
-        padding-bottom: env(safe-area-inset-bottom);
+        background: var(--card-bg); 
+        display: flex; justify-content: space-around; align-items: center;
+        height: 75px;
+        box-shadow: 0 -4px 25px rgba(0,0,0,0.05); 
+        border-radius: 24px 24px 0 0;
       }
+      
       .nav-btn { 
-        flex: 1; padding: 16px 0; text-align: center; 
-        background: none; border: none; font-size: 0.9rem; 
-        color: var(--text-muted); cursor: pointer; font-weight: 500;
+        background: none; border: none; font-size: 0.75rem; 
+        color: var(--text-muted); cursor: pointer; font-weight: 600;
+        display: flex; flex-direction: column; align-items: center; gap: 4px;
       }
-      .nav-btn.active { color: var(--primary); border-top: 3px solid var(--primary); }
+      .nav-btn.active { color: var(--primary); }
+      .nav-icon { font-size: 1.4rem; }
 
-      /* Ajustes SweetAlert2 para Mobile */
-      .swal2-popup { border-radius: 16px !important; }
-      .swal-form-input { 
-        width: 100%; padding: 12px; margin: 8px 0; 
-        border: 1px solid #D1D5DB; border-radius: 8px; 
+      .btn-float { 
+        position: relative; top: -25px;
+        background: var(--primary); color: white; 
+        border: none; width: 60px; height: 60px; 
+        border-radius: 50%; font-size: 30px; 
+        box-shadow: 0 8px 20px rgba(124, 58, 237, 0.4); 
+        cursor: pointer; display: flex; align-items: center; justify-content: center;
+      }
+
+      /* Estilização Modal Formulário */
+      .swal2-popup { border-radius: 24px !important; }
+      .swal-form-input, .swal-form-select { 
+        width: 100%; padding: 14px; margin: 8px 0; 
+        border: 1px solid #E5E7EB; border-radius: 12px; 
         box-sizing: border-box; font-family: 'Inter', sans-serif;
+        background: #F9FAFB; font-size: 1rem;
       }
-      .swal-form-select {
-        width: 100%; padding: 12px; margin: 8px 0;
-        border: 1px solid #D1D5DB; border-radius: 8px;
-        background: white; font-family: 'Inter', sans-serif;
-      }
+      .swal-form-input:focus, .swal-form-select:focus { outline: none; border-color: var(--primary); background: white; }
     </style>
   </head>
   <body>
     
-    <div class="header">Organização Financeira</div>
-
-    <div id="tab-dashboard" class="tab-content active">
-      <div class="card">
-        <h3>Visão Geral</h3>
-        <canvas id="meuGrafico"></canvas>
-      </div>
-      <div class="card" id="resumo-cards">Carregando...</div>
+    <div class="header">
+      <p>Saldo em contas</p>
+      <h1 id="saldo-total">R$ 0,00</h1>
     </div>
 
-    <div id="tab-lancamentos" class="tab-content">
-      <div class="card">
-        <h3>Movimentações</h3>
-        <div id="lista-lancamentos">Carregando...</div>
+    <div class="cards-container">
+      <div class="card-resumo">
+        <div class="card-resumo-header">
+          <div class="icon-box icon-receita">↑</div>
+          <p>Receitas</p>
+        </div>
+        <h3 id="resumo-receitas" class="valor-receita">R$ 0,00</h3>
       </div>
-      <button class="btn-float" onclick="abrirModalFormulario()">+</button>
+      <div class="card-resumo">
+        <div class="card-resumo-header">
+          <div class="icon-box icon-despesa">↓</div>
+          <p>Despesas</p>
+        </div>
+        <h3 id="resumo-despesas" class="valor-despesa">R$ 0,00</h3>
+      </div>
     </div>
 
-    <div id="tab-planners" class="tab-content">
-      <div class="card">
-        <h3>Planners</h3>
-        <p style="color: var(--text-muted); font-size: 0.9rem;">Em breve: Gestão de orçamentos e centros de custo.</p>
-      </div>
+    <div class="section-title">Movimentações</div>
+    <div class="lista-container" id="lista-lancamentos">
+      <p style="text-align: center; color: var(--text-muted); padding: 30px;">Carregando...</p>
     </div>
 
     <div class="nav-bar">
-      <button class="nav-btn active" onclick="trocarAba('tab-dashboard', this)">Dashboard</button>
-      <button class="nav-btn" onclick="trocarAba('tab-lancamentos', this)">Lançamentos</button>
-      <button class="nav-btn" onclick="trocarAba('tab-planners', this)">Planners</button>
+      <button class="nav-btn active">
+        <span class="nav-icon">📊</span>
+        <span>Resumo</span>
+      </button>
+      <button class="btn-float" onclick="abrirModalFormulario()">+</button>
+      <button class="nav-btn" onclick="Swal.fire('Em breve', 'Módulo de planejamento', 'info')">
+        <span class="nav-icon">🎯</span>
+        <span>Planos</span>
+      </button>
     </div>
 
     <script>
       let lancamentosAtuais = [];
+      let listaCartoes = [];
 
       document.addEventListener("DOMContentLoaded", () => { carregarDados(); });
 
-      function trocarAba(idAba, btn) {
-        document.querySelectorAll('.tab-content').forEach(aba => aba.classList.remove('active'));
-        document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-        document.getElementById(idAba).classList.add('active');
-        btn.classList.add('active');
+      function formatarMoeda(valor) {
+        return valor.toLocaleString('pt-BR', {style: 'currency', currency: 'BRL'});
       }
 
-function carregarDados() {
-        document.getElementById('lista-lancamentos').innerHTML = '<p style="color: #6B7280; text-align: center; padding: 20px 0;">Carregando dados...</p>';
-        
+      function carregarDados() {
+        document.getElementById('lista-lancamentos').innerHTML = '<p style="text-align: center; color: #6b7280; padding: 20px;">Buscando dados...</p>';
         google.script.run
           .withSuccessHandler((dados) => {
-            // Trava de segurança: Garante que "dados" seja sempre um array, mesmo se vier null
             const dadosSeguros = dados || []; 
             lancamentosAtuais = dadosSeguros; 
+            processarResumo(dadosSeguros);
             montarLista(dadosSeguros);
-            montarGrafico(dadosSeguros);
           })
           .withFailureHandler((err) => {
-            // Se der erro no backend (ex: aba com nome errado), mostra na tela
-            document.getElementById('lista-lancamentos').innerHTML = `<p style="color: var(--danger); text-align: center; padding: 20px 0;">Erro: ${err.message}</p>`;
+            document.getElementById('lista-lancamentos').innerHTML = `<p style="color: red; text-align: center;">Erro: ${err.message}</p>`;
           })
           .obterLancamentos();
+          google.script.run.withSuccessHandler((cartoes) => {
+    listaCartoes = cartoes;
+  }).obterCartoes();
+      }
+
+      function processarResumo(dados) {
+        let totalReceitas = 0;
+        let totalDespesas = 0;
+
+        dados.forEach(item => {
+          // Se o status for "Pendente", você pode optar por não somar no saldo atual. 
+          // Neste exemplo, vou somar tudo, mas fica a dica caso queira separar.
+          if (item.tipo === 'Receita') {
+            totalReceitas += item.valor;
+          } else {
+            totalDespesas += item.valor;
+          }
+        });
+
+        const saldoFinal = totalReceitas - totalDespesas;
+
+        document.getElementById('saldo-total').innerText = formatarMoeda(saldoFinal);
+        document.getElementById('resumo-receitas').innerText = formatarMoeda(totalReceitas);
+        document.getElementById('resumo-despesas').innerText = formatarMoeda(totalDespesas);
       }
 
       function montarLista(dados) {
         const divLista = document.getElementById('lista-lancamentos');
         
-        // Verifica de forma segura se a lista está vazia
         if(!dados || dados.length === 0) { 
-          divLista.innerHTML = '<p style="color: #6B7280; text-align: center; padding: 20px 0;">Nenhum lançamento encontrado. Clique no botão "+" para adicionar.</p>'; 
+          divLista.innerHTML = `<p style="text-align: center; color: #6b7280; padding: 40px;">Nenhum registro encontrado.</p>`; 
           return; 
         }
         
         let html = '';
-        dados.slice(0, 15).forEach(item => {
-          const corValor = item.status === 'Pendente' ? 'var(--danger)' : 'var(--success)';
+        dados.slice(0, 30).forEach(item => {
+          const isReceita = item.tipo === 'Receita';
+          const corValor = isReceita ? 'var(--success)' : 'var(--text-main)';
+          const sinal = isReceita ? '+' : '-';
+          
+          const isPendente = item.status === 'Pendente';
+          const statusBg = isPendente ? 'var(--bg-color)' : (isReceita ? 'var(--success-bg)' : 'var(--danger-bg)');
+          const statusColor = isPendente ? 'var(--text-muted)' : (isReceita ? 'var(--success)' : 'var(--danger)');
+
+          // Ícone simples baseado no tipo ou categoria
+          let icone = isReceita ? '💰' : '💸';
+          if (!isReceita && item.categoria.toLowerCase().includes('alimentaçã')) icone = '🍔';
+          if (!isReceita && item.categoria.toLowerCase().includes('transporte')) icone = '🚗';
+          
           html += `
-            <div class="item-lista">
+            <div class="item-lista" onclick="gerenciarItem('${item.id}')">
+              <div class="item-icon-bg">${icone}</div>
               <div class="item-info">
                 <strong>${item.descricao || 'Sem Descrição'}</strong>
-                <span>${item.dataVenc} • ${item.formaPgto} • ${item.categoria || 'Geral'}</span>
+                <span>${item.dataVenc} • ${item.categoria || 'Geral'}</span>
               </div>
               <div class="item-acoes">
-                <div class="item-valor" style="color: ${corValor}">R$ ${item.valor.toFixed(2)}</div>
-                <button class="btn-gerenciar" onclick="gerenciarItem('${item.id}')">Gerenciar</button>
+                <div class="item-valor" style="color: ${corValor}">${sinal} ${formatarMoeda(item.valor).replace('R$', '').trim()}</div>
+                <div class="status-badge" style="background: ${statusBg}; color: ${statusColor}">${item.status}</div>
               </div>
             </div>
           `;
@@ -211,38 +276,23 @@ function carregarDados() {
         divLista.innerHTML = html;
       }
 
-      function montarGrafico(dados) {
-        const total = dados.reduce((acc, curr) => acc + curr.valor, 0);
-        document.getElementById('resumo-cards').innerHTML = `<strong style="font-size:1.2rem;">Total: R$ ${total.toFixed(2)}</strong>`;
-        // Lógica do gráfico mantida simples para o exemplo
-        const ctx = document.getElementById('meuGrafico').getContext('2d');
-        if(window.meuChart) window.meuChart.destroy();
-        window.meuChart = new Chart(ctx, {
-          type: 'doughnut',
-          data: {
-            labels: ['Cadastrados'], datasets: [{ data: [total || 1], backgroundColor: ['#4F46E5'] }]
-          },
-          options: { cutout: '75%', plugins: { legend: { display: false } } }
-        });
-      }
-
-      // NOVO: Fluxo de Gestão (Editar / Excluir)
       function gerenciarItem(id) {
-        const item = lancamentosAtuais.find(l => l.id === id);
+        const item = lancamentosAtuais.find(l => l.id == id); 
         
         Swal.fire({
           title: item.descricao,
-          text: `Valor: R$ ${item.valor.toFixed(2)}`,
+          text: formatarMoeda(item.valor),
           showDenyButton: true,
           showCancelButton: true,
           confirmButtonText: 'Editar',
           denyButtonText: 'Excluir',
-          cancelButtonText: 'Voltar',
-          confirmButtonColor: '#4F46E5',
-          denyButtonColor: '#EF4444'
+          cancelButtonText: 'Fechar',
+          confirmButtonColor: '#7C3AED',
+          denyButtonColor: '#EF4444',
+          reverseButtons: true
         }).then((result) => {
           if (result.isConfirmed) {
-            abrirModalFormulario(item); // Abre o form preenchido
+            abrirModalFormulario(item); 
           } else if (result.isDenied) {
             confirmarExclusao(id);
           }
@@ -251,19 +301,18 @@ function carregarDados() {
 
       function confirmarExclusao(id) {
         Swal.fire({
-          title: 'Tem certeza?',
-          text: "Essa ação removerá a linha da planilha.",
+          title: 'Excluir registro?',
           icon: 'warning',
           showCancelButton: true,
           confirmButtonColor: '#EF4444',
           cancelButtonColor: '#6B7280',
-          confirmButtonText: 'Sim, excluir!'
+          confirmButtonText: 'Sim, excluir'
         }).then((result) => {
           if (result.isConfirmed) {
             Swal.showLoading();
             google.script.run
               .withSuccessHandler(() => {
-                Swal.fire('Excluído!', '', 'success');
+                Swal.fire({title: 'Excluído!', icon: 'success', timer: 1500, showConfirmButton: false});
                 carregarDados();
               }).withFailureHandler((err) => {
                 Swal.fire('Erro', err.message, 'error');
@@ -272,49 +321,55 @@ function carregarDados() {
         });
       }
 
-      // Modal unificado para Criar e Editar
       function abrirModalFormulario(itemExistente = null) {
         const isEdit = itemExistente !== null;
         
-        // Formata data para o input type="date" (YYYY-MM-DD)
         let dataInput = '';
         if (isEdit && itemExistente.dataVencBruta) {
-          const d = new Date(itemExistente.dataVencBruta);
-          dataInput = d.toISOString().split('T')[0];
+          try {
+            const d = new Date(itemExistente.dataVencBruta);
+            if (!isNaN(d.getTime())) dataInput = d.toISOString().split('T')[0];
+          } catch(e) {}
         }
 
         const htmlForm = `
-          <input id="f-desc" class="swal-form-input" placeholder="Descrição (ex: Mercado)" value="${isEdit ? itemExistente.descricao : ''}">
+          <select id="f-tipo" class="swal-form-select" style="font-weight: bold; color: var(--primary);">
+            <option value="Despesa" ${isEdit && itemExistente.tipo === 'Despesa' ? 'selected' : ''}>Saída (Despesa)</option>
+            <option value="Receita" ${isEdit && itemExistente.tipo === 'Receita' ? 'selected' : ''}>Entrada (Receita/Renda)</option>
+          </select>
+
+          <input id="f-desc" class="swal-form-input" placeholder="Descrição (ex: Salário, Mercado)" value="${isEdit ? itemExistente.descricao : ''}">
           <input id="f-valor" type="number" step="0.01" class="swal-form-input" placeholder="Valor (R$)" value="${isEdit ? itemExistente.valor : ''}">
           
           <select id="f-forma" class="swal-form-select">
-            <option value="" disabled ${!isEdit || !itemExistente.formaPgto ? 'selected' : ''}>Forma de Pagamento</option>
+            <option value="" disabled ${!isEdit || !itemExistente.formaPgto ? 'selected' : ''}>Forma de Pagamento/Recebimento</option>
             <option value="Pix" ${isEdit && itemExistente.formaPgto === 'Pix' ? 'selected' : ''}>Pix</option>
             <option value="Cartão de Crédito" ${isEdit && itemExistente.formaPgto === 'Cartão de Crédito' ? 'selected' : ''}>Cartão de Crédito</option>
-            <option value="Boleto" ${isEdit && itemExistente.formaPgto === 'Boleto' ? 'selected' : ''}>Boleto</option>
+            <option value="Dinheiro" ${isEdit && itemExistente.formaPgto === 'Dinheiro' ? 'selected' : ''}>Dinheiro/Transferência</option>
           </select>
           
-          <input id="f-cat" class="swal-form-input" placeholder="Categoria Principal" value="${isEdit ? itemExistente.categoria : ''}">
+          <input id="f-cat" class="swal-form-input" placeholder="Categoria (ex: Alimentação, Renda Fixa)" value="${isEdit ? itemExistente.categoria : ''}">
           
           <select id="f-status" class="swal-form-select">
-            <option value="Pendente" ${isEdit && itemExistente.status === 'Pendente' ? 'selected' : ''}>Pendente</option>
-            <option value="Liquidado" ${isEdit && itemExistente.status === 'Liquidado' ? 'selected' : ''}>Liquidado</option>
+            <option value="Liquidado" ${isEdit && itemExistente.status === 'Liquidado' ? 'selected' : ''}>Pago / Recebido</option>
+            <option value="Pendente" ${!isEdit || itemExistente.status === 'Pendente' ? 'selected' : ''}>Pendente / A Vencer</option>
           </select>
           
           <input id="f-venc" type="date" class="swal-form-input" value="${dataInput}">
         `;
 
         Swal.fire({
-          title: isEdit ? 'Editar Lançamento' : 'Novo Lançamento',
+          title: isEdit ? 'Editar Registro' : 'Novo Registro',
           html: htmlForm,
           focusConfirm: false,
           showCancelButton: true,
-          confirmButtonText: 'Salvar',
+          confirmButtonText: 'Gravar',
           cancelButtonText: 'Cancelar',
-          confirmButtonColor: '#10B981',
+          confirmButtonColor: '#7C3AED',
           preConfirm: () => {
             return {
               id: isEdit ? itemExistente.id : null,
+              tipo: document.getElementById('f-tipo').value, // NOVO CAMPO
               descricao: document.getElementById('f-desc').value,
               valorBruto: document.getElementById('f-valor').value,
               formaPagamento: document.getElementById('f-forma').value,
@@ -327,9 +382,9 @@ function carregarDados() {
           if (result.isConfirmed) {
             Swal.showLoading();
             google.script.run
-              .withSuccessHandler((msg) => {
-                Swal.fire('Sucesso!', msg, 'success');
-                carregarDados(); // Recarrega a tela automaticamente
+              .withSuccessHandler(() => {
+                Swal.fire({title: 'Salvo!', icon: 'success', timer: 1500, showConfirmButton: false});
+                carregarDados(); 
               })
               .withFailureHandler((err) => {
                 Swal.fire('Erro', err.message, 'error');
@@ -337,7 +392,65 @@ function carregarDados() {
               .salvarLancamento(result.value);
           }
         });
+        const htmlForm = `
+    <select id="f-tipo" class="swal-form-select">
+      <option value="Despesa" ${itemExistente?.tipo === 'Despesa' ? 'selected' : ''}>Saída (Despesa)</option>
+      <option value="Receita" ${itemExistente?.tipo === 'Receita' ? 'selected' : ''}>Entrada (Receita)</option>
+    </select>
+
+    <input id="f-desc" class="swal-form-input" placeholder="Descrição" value="${itemExistente?.descricao || ''}">
+    <input id="f-valor" type="number" step="0.01" class="swal-form-input" placeholder="Valor (R$)" value="${itemExistente?.valor || ''}">
+    
+    <select id="f-forma" class="swal-form-select" onchange="verificarCartao(this.value)">
+      <option value="" disabled selected>Forma de Pagamento</option>
+      <option value="Pix">Pix</option>
+      <option value="Dinheiro">Dinheiro</option>
+      <option value="Cartão de Crédito">Cartão de Crédito</option>
+    </select>
+
+    <div id="div-cartao" style="display:none;">
+      <select id="f-cartao-nome" class="swal-form-select">
+        <option value="">Selecione o Cartão</option>
+        ${listaCartoes.map(c => `<option value="${c}">${c}</option>`).join('')}
+      </select>
+    </div>
+
+    <input id="f-cat" class="swal-form-input" placeholder="Categoria" value="${itemExistente?.categoria || ''}">
+    <select id="f-status" class="swal-form-select">
+      <option value="Liquidado">Pago / Recebido</option>
+      <option value="Pendente">Pendente</option>
+    </select>
+    <input id="f-venc" type="date" class="swal-form-input" value="${dataInput}">
+  `;
+
+  Swal.fire({
+    title: itemExistente ? 'Editar' : 'Novo Registro',
+    html: htmlForm,
+    preConfirm: () => {
+      return {
+        id: itemExistente?.id || null,
+        tipo: document.getElementById('f-tipo').value,
+        descricao: document.getElementById('f-desc').value,
+        valorBruto: document.getElementById('f-valor').value,
+        formaPagamento: document.getElementById('f-forma').value,
+        cartaoSelecionado: document.getElementById('f-cartao-nome').value,
+        categoria: document.getElementById('f-cat').value,
+        status: document.getElementById('f-status').value,
+        dataVencimento: document.getElementById('f-venc').value
+      };
+    }
+  }).then((result) => {
+    if (result.isConfirmed) {
+      google.script.run.withSuccessHandler(carregarDados).salvarLancamento(result.value);
+    }
+  });
+
       }
+
+      function verificarCartao(valor) {
+  const div = document.getElementById('div-cartao');
+  div.style.display = (valor === 'Cartão de Crédito') ? 'block' : 'none';
+}
     </script>
   </body>
 </html>
